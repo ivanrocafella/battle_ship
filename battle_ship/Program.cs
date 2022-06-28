@@ -94,19 +94,56 @@ namespace battle_ship
             int key;
             int x;
             int y;
-            int zeroOrOne;
-            for (int i = 1; i <= 7; i++)
+            int direction;// 0 - right, 1 - left, 2 - up, 3 - down
+            string lastValue = string.Empty;
+            string value = string.Empty;
+            int keyOfLastValue;
+            for (int i = 1; i <= 4; i++)
             {
                 for (int j = 1; j <= i; j++)
                 {
-                   zeroOrOne = random.Next(1);
-                   indexKey = random.Next(keys.Count);
-                   key = keys[indexKey];
-                   if (IsExistSpace(dict, key))
+                    value = i.ToString();
+                    direction = random.Next(4);
+                    if (lastValue == value && int.TryParse(lastValue, out _))
                    {
-                       dict[key] = $"{i}";
-                       keys.Remove(key);
-                   }      
+                        keyOfLastValue = dict.FirstOrDefault(v => v.Value == lastValue).Key;
+                        int[] xy = keyOfLastValue.ToString().Select(e => int.Parse(e.ToString())).ToArray();
+                        switch (direction)
+                        {
+                            case 0:                                
+                                x = xy[0] + 1;
+                                key = int.Parse($"{x}{xy[1]}");
+                                break;
+                            case 1:
+                                x = xy[0] - 1;
+                                key = int.Parse($"{x}{xy[1]}");
+                                break;
+                            case 2:
+                                y = xy[1] + 1;
+                                key = int.Parse($"{xy[0]}{y}");
+                                break;
+                            case 3:
+                                y = xy[1] - 1;
+                                key = int.Parse($"{xy[0]}{y}");
+                                break;
+                        }
+                       // if (!int.TryParse(dict[key], out _))
+                       // {
+                       //
+                       // }
+                    }
+                   else
+                   {                    
+                     indexKey = random.Next(keys.Count);
+                     key = keys[indexKey];
+                     if (IsExistSpace(dict, key))
+                     {
+                         value = $"{i}";
+                         dict[key] = value;
+                         lastValue = value;
+                         keys.Remove(key);
+                     }
+                    }  
                 };
             }
             return dict;
