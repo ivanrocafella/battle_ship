@@ -84,7 +84,7 @@ namespace battle_ship
         }
 
         public static bool IsExistSpace(Dictionary<int, string> dict, int key) 
-            => !int.TryParse(dict[key], out _);
+            => dict.ContainsKey(key) && !int.TryParse(dict[key], out _);
 
         public static Dictionary<int, string> PutNewShip(Dictionary<int, string> dict)
         {
@@ -92,15 +92,17 @@ namespace battle_ship
             Random random = new Random();
             int indexKey;
             int key;
-            int x;
-            int y;
-            int direction;// 0 - right, 1 - left, 2 - up, 3 - down
+            int keyOfLastValue;
+            string keyStr = string.Empty;
             string lastValue = string.Empty;
             string value = string.Empty;
-            int keyOfLastValue;
+            int x;
+            int y;
+            int direction;// 0 - right, 1 - left, 2 - up, 3 - down          
+            int elemFordelKey;
             for (int i = 1; i <= 4; i++)
             {
-                for (int j = 1; j <= i; j++)
+                for (int j = 0; j < i; j++)
                 {
                     value = i.ToString();
                     direction = random.Next(4);
@@ -112,25 +114,37 @@ namespace battle_ship
                         {
                             case 0:                                
                                 x = xy[0] + 1;
-                                key = int.Parse($"{x}{xy[1]}");
+                                keyStr = int.Parse($"{x}{xy[1]}").ToString();
                                 break;
                             case 1:
                                 x = xy[0] - 1;
-                                key = int.Parse($"{x}{xy[1]}");
+                                keyStr = int.Parse($"{x}{xy[1]}").ToString();
                                 break;
                             case 2:
                                 y = xy[1] + 1;
-                                key = int.Parse($"{xy[0]}{y}");
+                                keyStr = int.Parse($"{xy[0]}{y}").ToString();
                                 break;
                             case 3:
                                 y = xy[1] - 1;
-                                key = int.Parse($"{xy[0]}{y}");
+                                keyStr = int.Parse($"{xy[0]}{y}").ToString();
                                 break;
                         }
-                       // if (!int.TryParse(dict[key], out _))
-                       // {
-                       //
-                       // }
+                        key = int.Parse(keyStr);
+                        if (IsExistSpace(dict, key))
+                        {
+                            MakeSectionOfShip(ref dict, ref value, ref lastValue, ref key, i, ref keys);
+                        }
+                        else
+                        {
+                            do
+                            {
+                                elemFordelKey = dict.FirstOrDefault(e => e.Value == lastValue).Key;
+                                dict[elemFordelKey] = " ";
+                            } 
+                            while (elemFordelKey != 0);
+                            --i;
+                            lastValue = i.ToString();
+                        }
                     }
                    else
                    {                    
@@ -138,15 +152,21 @@ namespace battle_ship
                      key = keys[indexKey];
                      if (IsExistSpace(dict, key))
                      {
-                         value = $"{i}";
-                         dict[key] = value;
-                         lastValue = value;
-                         keys.Remove(key);
+                       MakeSectionOfShip(ref dict, ref value, ref lastValue, ref key, i, ref keys);
                      }
                     }  
                 };
             }
             return dict;
+        }
+
+        public static void MakeSectionOfShip(ref Dictionary<int, string> dict, ref string value,
+            ref string lastValue, ref int key, int type, ref List<int> keys)
+        {
+            value = $"{type}";
+            dict[key] = value;
+            lastValue = value;
+            keys.Remove(key);
         }
     }
 }
