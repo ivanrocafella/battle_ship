@@ -51,7 +51,7 @@ namespace battle_ship
             {
                 if (i % 10 == 0)
                     continue;
-                dictWithSpace.Add(i," ");
+                dictWithSpace.Add(i, " ");
             }
             return dictWithSpace;
         }
@@ -83,7 +83,7 @@ namespace battle_ship
             return false;
         }
 
-        public static bool IsExistSpace(Dictionary<int, string> dict, int key) 
+        public static bool IsExistSpace(Dictionary<int, string> dict, int key)
             => dict.ContainsKey(key) && !int.TryParse(dict[key], out _);
 
         public static Dictionary<int, string> PutNewShip(Dictionary<int, string> dict)
@@ -100,6 +100,7 @@ namespace battle_ship
             int y;
             int direction;// 0 - right, 1 - left, 2 - up, 3 - down          
             int elemFordelKey;
+            string[] values;
             for (int i = 1; i <= 4; i++)
             {
                 for (int j = 0; j < i; j++)
@@ -107,12 +108,12 @@ namespace battle_ship
                     value = i.ToString();
                     direction = random.Next(4);
                     if (lastValue == value && int.TryParse(lastValue, out _))
-                   {
+                    {
                         keyOfLastValue = dict.FirstOrDefault(v => v.Value == lastValue).Key;
                         int[] xy = keyOfLastValue.ToString().Select(e => int.Parse(e.ToString())).ToArray();
                         switch (direction)
                         {
-                            case 0:                                
+                            case 0:
                                 x = xy[0] + 1;
                                 keyStr = int.Parse($"{x}{xy[1]}").ToString();
                                 break;
@@ -140,23 +141,32 @@ namespace battle_ship
                             {
                                 elemFordelKey = dict.FirstOrDefault(e => e.Value == lastValue).Key;
                                 dict[elemFordelKey] = " ";
-                            } 
+                            }
                             while (elemFordelKey != 0);
                             --i;
                             lastValue = i.ToString();
                         }
                     }
-                   else
-                   {                    
-                     indexKey = random.Next(keys.Count);
-                     key = keys[indexKey];
-                     if (IsExistSpace(dict, key))
-                     {
-                       MakeSectionOfShip(ref dict, ref value, ref lastValue, ref key, i, ref keys);
-                     }
-                    }  
+                    else
+                    {
+                        indexKey = random.Next(keys.Count);
+                        key = keys[indexKey];
+                        if (IsExistSpace(dict, key))
+                        {
+                            MakeSectionOfShip(ref dict, ref value, ref lastValue, ref key, i, ref keys);
+                        }
+                    }
                 };
             }
+            for (int i = 1; i <= 4 ; i++)
+            {
+                values = dict.Where(e => e.Value == i.ToString()).Select(v => v.Value).ToArray();
+                if (values.Length > i)
+                {
+                    dict = MakeNewDictWithSpace();
+                    PutNewShip(dict);
+                }                  
+            }           
             return dict;
         }
 
@@ -167,6 +177,7 @@ namespace battle_ship
             dict[key] = value;
             lastValue = value;
             keys.Remove(key);
+            value = string.Empty;
         }
     }
 }
