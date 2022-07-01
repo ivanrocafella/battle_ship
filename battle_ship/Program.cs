@@ -12,18 +12,40 @@ namespace battle_ship
         {
             shipsPlayer = MakeNewDictWithSpace();
             shipsComputer = MakeNewDictWithSpace();
+
+            PutNewShip(shipsComputer);
+            Console.WriteLine(MakeMap(shipsPlayer, shipsComputer));
+
+            
+
+            Console.Write("Please choose the type of ship to be placed on the map:\n" +
+                "1. Single-deck ship\n" +
+                "2. Double-deck ship\n" +
+                "3. Triple-deck ship\n" +
+                "4. Four-deck ship\n" +
+                "Please enter (1,2,3 or 4): ");
+            string type = Console.ReadLine();
+            Console.Write("Введите координату x: ");
+            int x = Console.Read();            
+            Console.Write("Введите координату y: ");
+            int y = Console.Read();
+            MakeSectionOfShip(shipsPlayer, type, x, y);
+            // while (true)
+            // {
+            //   
+            // }
+
             // ships[55] = "o";
             // ships = MakeSectionOfShip(ships, "4", 5, 6);
             // ships = MakeShot(ships, 7, 6);
-            PutNewShip(shipsComputer);
-            Console.WriteLine(MakeMap(shipsPlayer, shipsComputer));
+
 
         }
 
         public static string MakeMap(Dictionary<int, string> shipsPlayer, Dictionary<int, string> shipsComputer)
         {
             string v = "   --- --- --- --- --- --- --- --- ---\t\t   --- --- --- --- --- --- --- --- ---\n";
-            string map = " --- --- --- Ваша карта --- --- --- ---\t\t--- --- --- Карта противника --- --- ---\n" +
+            string map = " --- --- --- Your map --- --- --- ---\t\t--- --- --- Computers's map --- --- ---\n" +
                          "  y\t\t\t\t\t\t  y\n" +
                          $"{v}" +
                          $"9 | {shipsPlayer[19]} | {shipsPlayer[29]} | {shipsPlayer[39]} | {shipsPlayer[49]} | {shipsPlayer[59]} | {shipsPlayer[69]} | {shipsPlayer[79]} | {shipsPlayer[89]} | {shipsPlayer[99]} |\t\t9 | {shipsComputer[19]} | {shipsComputer[29]} | {shipsComputer[39]} | {shipsComputer[49]} | {shipsComputer[59]} | {shipsComputer[69]} | {shipsComputer[79]} | {shipsComputer[89]} | {shipsComputer[99]} |\n" +
