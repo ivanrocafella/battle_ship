@@ -8,28 +8,54 @@ namespace battle_ship
     {
         public static Dictionary<int, string> shipsPlayer;
         public static Dictionary<int, string> shipsComputer;
+        public static Dictionary<int, string> shipsComputerForPlayer;
         static void Main(string[] args)
         {
             shipsPlayer = MakeNewDictWithSpace();
             shipsComputer = MakeNewDictWithSpace();
+            shipsComputerForPlayer = MakeNewDictWithSpace();
 
             PutNewShip(shipsComputer);
             Console.WriteLine(MakeMap(shipsPlayer, shipsComputer));
 
+            int type;
+            while (!IsExistAllShips(shipsPlayer, 10))
+            {
+                type = ChooseTypeShipMenu();
+                if (IsIxistShip(shipsPlayer, type))
+                {
+                    Console.WriteLine("Корабль такого типа вы уже разместили. Выберите пожалуйста другой тип корабля");
+                    continue;
+                }
+                MakeSectionOfShip(shipsPlayer, type);
+                Console.WriteLine(MakeMap(shipsPlayer, shipsComputer));
+            }
+            Console.WriteLine("Игра началась!");
+            while (true)
+            {
+                Console.WriteLine("Введите координаты для выстрела:");
+                MakeShot(shipsComputer,shipsComputerForPlayer);
+                GetShot(shipsPlayer);
+                Console.WriteLine(MakeMap(shipsPlayer, shipsComputerForPlayer));
+                if (shipsComputer.FirstOrDefault(e => int.TryParse(e.Value, out _)).Value == null)
+                {
+                    Console.WriteLine("Вы выиграли");
+                    break;
+                }
+                else if (shipsPlayer.FirstOrDefault(e => int.TryParse(e.Value, out _)).Value == null)
+                {
+                    Console.WriteLine("Вы проиграли");
+                    break;
+                }
+            }
             
 
-            Console.Write("Please choose the type of ship to be placed on the map:\n" +
-                "1. Single-deck ship\n" +
-                "2. Double-deck ship\n" +
-                "3. Triple-deck ship\n" +
-                "4. Four-deck ship\n" +
-                "Please enter (1,2,3 or 4): ");
-            string type = Console.ReadLine();
-            Console.Write("Введите координату x: ");
-            int x = Console.Read();            
-            Console.Write("Введите координату y: ");
-            int y = Console.Read();
-            MakeSectionOfShip(shipsPlayer, type, x, y);
+
+            // Console.Write("Введите координату x: ");
+            // int x = Console.Read();            
+            // Console.Write("Введите координату y: ");
+            // int y = Console.Read();
+            // MakeSectionOfShip(shipsPlayer, type, x, y);
             // while (true)
             // {
             //   
@@ -40,6 +66,62 @@ namespace battle_ship
             // ships = MakeShot(ships, 7, 6);
 
 
+        }
+
+
+
+        public static int ChooseTypeShipMenu()
+        {
+            int type;
+            try
+            {
+                Console.Write("Please choose the type of ship to be placed on the map:\n" +
+                             "1. Single-deck ship\n" +
+                             "2. Double-deck ship\n" +
+                             "3. Triple-deck ship\n" +
+                             "4. Four-deck ship\n" +
+                             "Please enter (1,2,3 or 4): ");
+                type = int.Parse(Console.ReadLine());
+                if (type > 0 && type <= 4)                   
+                    return type;
+                else
+                    throw new Exception("Ошибка! Вы можете ввести только 1,2,3 или 4");
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Ошибка! Вы ввели не число");
+                return ChooseTypeShipMenu();
+            }
+            catch (Exception ex1)
+            {
+                Console.WriteLine(ex1.Message);
+                return ChooseTypeShipMenu();
+            }
+        }
+
+        public static int EnterCoordShipMenu(string axis)
+        {
+            int coord;
+            try
+            {
+                Console.Write($"Пожалуйста введите координаты по оси {axis}\n"+
+                             "Please enter (from 1 till 9): ");
+                coord = int.Parse(Console.ReadLine());
+                2if (coord > 0 && coord <= 9)
+                    return coord;
+                else
+                    throw new Exception("Ошибка! Вы можете ввести только от 1 до 9");
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Ошибка! Вы ввели не число");
+                return EnterCoordShipMenu(axis);
+            }
+            catch (Exception ex1)
+            {
+                Console.WriteLine(ex1.Message);
+                return EnterCoordShipMenu(axis);
+            }
         }
 
         public static string MakeMap(Dictionary<int, string> shipsPlayer, Dictionary<int, string> shipsComputer)
@@ -82,30 +164,63 @@ namespace battle_ship
             return dictWithSpace;
         }
 
-        public static Dictionary<int, string> MakeSectionOfShip(Dictionary<int, string> dict, string type, int x, int y)
+        public static void MakeSectionOfShip(Dictionary<int, string> dict, int type)
         {
+            int x = EnterCoordShipMenu("x");
+            int y = EnterCoordShipMenu("y");
             int key = int.Parse($"{x}{y}");
-            dict[key] = type;
-            return dict;
-        }
-
-        public static Dictionary<int, string> MakeShot(Dictionary<int, string> dict, int x, int y)
-        {
-            int key = int.Parse($"{x}{y}");
-            if (int.TryParse(dict[key], out _))
-                shipsComputer[key] = "x";
+            if (IsExistSpace(dict, key))
+                dict[key] = type.ToString();
             else
-                shipsComputer[key] = "o";
-            return dict;
+            {
+                Console.WriteLine("В этих координатах уже размещён корабль. Повторите ввод");
+                MakeSectionOfShip(dict, type);
+            }                
         }
 
-        public static bool IsIxistShip(Dictionary<int, string> dict)
+        public static void GetShot(Dictionary<int, string> shipsPlayer)
         {
+            Random random = new Random();
+            int x = random.Next(1,10);
+            int y = random.Next(1,10);
+            int key = int.Parse($"{x}{y}");
+            if (int.TryParse(shipsPlayer[key], out _))
+                shipsPlayer[key] = "x";
+            else
+                shipsPlayer[key] = "o";
+        }
+
+        public static void MakeShot(Dictionary<int, string> shipsComputer,
+            Dictionary<int, string> shipsComputerForPlayer)
+        {
+            int x = EnterCoordShipMenu("x");
+            int y = EnterCoordShipMenu("y");
+            int key = int.Parse($"{x}{y}");
+            shipsComputerForPlayer[key] = int.TryParse(shipsComputer[key], out _) ? "x" : "o";
+        }
+
+        public static bool IsExistAllShips(Dictionary<int, string> dict, int count)
+        {
+            int i = 0; 
             foreach (var item in dict)
             {
                 if (int.TryParse(item.Value, out _))
+                    i++;
+                if (i == count)
                     return true;
-            };
+            }
+            return false;
+        }
+        public static bool IsIxistShip(Dictionary<int, string> dict, int type)
+        {
+            int i = 0;
+            foreach (var item in dict)
+            {
+                if (item.Value == $"{type}")
+                    i++;
+                if (i == type)
+                    return true;
+            }
             return false;
         }
 
