@@ -107,7 +107,7 @@ namespace battle_ship
                 Console.Write($"Пожалуйста введите координаты по оси {axis}\n"+
                              "Please enter (from 1 till 9): ");
                 coord = int.Parse(Console.ReadLine());
-                2if (coord > 0 && coord <= 9)
+                if (coord > 0 && coord <= 9)
                     return coord;
                 else
                     throw new Exception("Ошибка! Вы можете ввести только от 1 до 9");
