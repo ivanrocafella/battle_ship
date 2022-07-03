@@ -11,12 +11,20 @@ namespace battle_ship
         public static Dictionary<int, string> shipsComputerForPlayer;
         static void Main(string[] args)
         {
+            Console.WriteLine("--------------------------------Welcome to \"Sea Battle\"!--------------------------------");
+            Game();
+        }
+
+        //Method where the whole reflection of the game
+        public static void Game()
+        {
             shipsPlayer = MakeNewDictWithSpace();
             shipsComputer = MakeNewDictWithSpace();
             shipsComputerForPlayer = MakeNewDictWithSpace();
+            string selection = string.Empty;
 
-            PutNewShip(shipsComputer);
-            Console.WriteLine(MakeMap(shipsPlayer, shipsComputer));
+            PutShipsByComputer(shipsComputer);
+            Console.WriteLine(MakeMap(shipsPlayer, shipsComputerForPlayer));
 
             int type;
             while (!IsExistAllShips(shipsPlayer, 10))
@@ -24,52 +32,69 @@ namespace battle_ship
                 type = ChooseTypeShipMenu();
                 if (IsIxistShip(shipsPlayer, type))
                 {
-                    Console.WriteLine("Корабль такого типа вы уже разместили. Выберите пожалуйста другой тип корабля");
+                    Console.WriteLine("You have already placed a ship of this type. Please select another ship type");
                     continue;
                 }
                 MakeSectionOfShip(shipsPlayer, type);
-                Console.WriteLine(MakeMap(shipsPlayer, shipsComputer));
+                Console.WriteLine(MakeMap(shipsPlayer, shipsComputerForPlayer));
             }
-            Console.WriteLine("Игра началась!");
+            Console.WriteLine("The game has begun!");
             while (true)
             {
-                Console.WriteLine("Введите координаты для выстрела:");
-                MakeShot(shipsComputer,shipsComputerForPlayer);
+                Console.WriteLine("You fire:");
+                MakeShot(shipsComputer, shipsComputerForPlayer);
                 GetShot(shipsPlayer);
                 Console.WriteLine(MakeMap(shipsPlayer, shipsComputerForPlayer));
                 if (shipsComputer.FirstOrDefault(e => int.TryParse(e.Value, out _)).Value == null)
                 {
-                    Console.WriteLine("Вы выиграли");
+                    Console.WriteLine("You won");
                     break;
                 }
                 else if (shipsPlayer.FirstOrDefault(e => int.TryParse(e.Value, out _)).Value == null)
                 {
-                    Console.WriteLine("Вы проиграли");
+                    Console.WriteLine("You lost");
                     break;
                 }
             }
-            
-
-
-            // Console.Write("Введите координату x: ");
-            // int x = Console.Read();            
-            // Console.Write("Введите координату y: ");
-            // int y = Console.Read();
-            // MakeSectionOfShip(shipsPlayer, type, x, y);
-            // while (true)
-            // {
-            //   
-            // }
-
-            // ships[55] = "o";
-            // ships = MakeSectionOfShip(ships, "4", 5, 6);
-            // ships = MakeShot(ships, 7, 6);
-
+            switch (GetYesOrNo())
+            {
+                case "y":
+                    Console.Clear();
+                    Game();
+                    break;
+                case "n":
+                    Environment.Exit(0);
+                    break;
+            }
 
         }
 
+        //Method returning yes or no for replaying or closing the game
+        public static string GetYesOrNo()
+        {
+            Console.Write("Do you want to play again?  \"y\" - yes, \"n\" - no (exit the program): ");
+            string selection;
+            try
+            {
+                selection = Console.ReadLine().ToLower().Trim();
+                switch (selection)
+                {
+                    case "y":
+                        return "y";
+                    case "n":
+                        return "n";
+                    default:
+                        throw new Exception("You can only select \"y\" or \"n\"");
+                }
+            }
+            catch (Exception fex)
+            {
+                Console.WriteLine(fex.Message);
+                return GetYesOrNo();
+            }
+        }
 
-
+        //Method for ship type selection
         public static int ChooseTypeShipMenu()
         {
             int type;
@@ -85,11 +110,11 @@ namespace battle_ship
                 if (type > 0 && type <= 4)                   
                     return type;
                 else
-                    throw new Exception("Ошибка! Вы можете ввести только 1,2,3 или 4");
+                    throw new Exception("Error! You can only enter 1,2,3 or 4");
             }
             catch (FormatException)
             {
-                Console.WriteLine("Ошибка! Вы ввели не число");
+                Console.WriteLine("Error! You didn't enter a number");
                 return ChooseTypeShipMenu();
             }
             catch (Exception ex1)
@@ -99,22 +124,23 @@ namespace battle_ship
             }
         }
 
+        //Method for entering coordinates
         public static int EnterCoordShipMenu(string axis)
         {
             int coord;
             try
             {
-                Console.Write($"Пожалуйста введите координаты по оси {axis}\n"+
+                Console.Write($"Please enter axis coordinates {axis}\n"+
                              "Please enter (from 1 till 9): ");
                 coord = int.Parse(Console.ReadLine());
                 if (coord > 0 && coord <= 9)
                     return coord;
                 else
-                    throw new Exception("Ошибка! Вы можете ввести только от 1 до 9");
+                    throw new Exception("Error! You can only enter from 1 to 9");
             }
             catch (FormatException)
             {
-                Console.WriteLine("Ошибка! Вы ввели не число");
+                Console.WriteLine("Error! You didn't enter a number");
                 return EnterCoordShipMenu(axis);
             }
             catch (Exception ex1)
@@ -124,6 +150,7 @@ namespace battle_ship
             }
         }
 
+        //Method for drawing maps
         public static string MakeMap(Dictionary<int, string> shipsPlayer, Dictionary<int, string> shipsComputer)
         {
             string v = "   --- --- --- --- --- --- --- --- ---\t\t   --- --- --- --- --- --- --- --- ---\n";
@@ -152,6 +179,7 @@ namespace battle_ship
             return map;
         }
 
+        //Method for creating a dictionary of ships with spaces
         public static Dictionary<int, string> MakeNewDictWithSpace()
         {
             Dictionary<int, string> dictWithSpace = new Dictionary<int, string>();
@@ -164,6 +192,7 @@ namespace battle_ship
             return dictWithSpace;
         }
 
+        //Method for creating a ship section entry in the dictionary
         public static void MakeSectionOfShip(Dictionary<int, string> dict, int type)
         {
             int x = EnterCoordShipMenu("x");
@@ -173,32 +202,42 @@ namespace battle_ship
                 dict[key] = type.ToString();
             else
             {
-                Console.WriteLine("В этих координатах уже размещён корабль. Повторите ввод");
+                Console.WriteLine("A ship has already been placed at these coordinates. Retype");
                 MakeSectionOfShip(dict, type);
             }                
         }
 
+        //Сomputer damage method
         public static void GetShot(Dictionary<int, string> shipsPlayer)
         {
             Random random = new Random();
             int x = random.Next(1,10);
             int y = random.Next(1,10);
             int key = int.Parse($"{x}{y}");
-            if (int.TryParse(shipsPlayer[key], out _))
-                shipsPlayer[key] = "x";
+            if (shipsPlayer[key] == "x" || shipsPlayer[key] == "o")
+                GetShot(shipsPlayer);
             else
-                shipsPlayer[key] = "o";
+            {
+                if (int.TryParse(shipsPlayer[key], out _))
+                    shipsPlayer[key] = "x";
+                else
+                    shipsPlayer[key] = "o";
+            }
         }
 
+        //Method of shooting at a computer ship
         public static void MakeShot(Dictionary<int, string> shipsComputer,
             Dictionary<int, string> shipsComputerForPlayer)
         {
             int x = EnterCoordShipMenu("x");
             int y = EnterCoordShipMenu("y");
             int key = int.Parse($"{x}{y}");
-            shipsComputerForPlayer[key] = int.TryParse(shipsComputer[key], out _) ? "x" : "o";
+            shipsComputerForPlayer[key] = int.TryParse(shipsComputer[key], out _) || shipsComputer[key]=="x" ? "x" : "o";
+            if (shipsComputerForPlayer[key] == "x")
+                shipsComputer[key] = "x";
         }
 
+        //Method for checking the availability of a complete set of ships
         public static bool IsExistAllShips(Dictionary<int, string> dict, int count)
         {
             int i = 0; 
@@ -211,6 +250,8 @@ namespace battle_ship
             }
             return false;
         }
+
+        //Ship presence check method
         public static bool IsIxistShip(Dictionary<int, string> dict, int type)
         {
             int i = 0;
@@ -224,10 +265,12 @@ namespace battle_ship
             return false;
         }
 
+        //Method for checking empty space to place a ship section
         public static bool IsExistSpace(Dictionary<int, string> dict, int key)
             => dict.ContainsKey(key) && !int.TryParse(dict[key], out _);
 
-        public static Dictionary<int, string> PutNewShip(Dictionary<int, string> dict)
+        //Method with a ship placement algorithm by a computer
+        public static Dictionary<int, string> PutShipsByComputer(Dictionary<int, string> dict)
         {
             List<int> keys = dict.Select(k => k.Key).ToList();
             Random random = new Random();
@@ -293,9 +336,7 @@ namespace battle_ship
                         indexKey = random.Next(keys.Count);
                         key = keys[indexKey];
                         if (IsExistSpace(dict, key))
-                        {
                             MakeSectionOfShip(ref dict, ref value, ref lastValue, ref key, i, ref keys);
-                        }
                     }
                 };
             }
@@ -305,12 +346,13 @@ namespace battle_ship
                 if (values.Length > i)
                 {
                     dict = MakeNewDictWithSpace();
-                    PutNewShip(dict);
+                    PutShipsByComputer(dict);
                 }                  
             }           
             return dict;
         }
 
+        //Method of writing a ship section to a computer ship dictionary
         public static void MakeSectionOfShip(ref Dictionary<int, string> dict, ref string value,
             ref string lastValue, ref int key, int type, ref List<int> keys)
         {
